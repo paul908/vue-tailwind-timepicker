@@ -155,13 +155,35 @@ function activeTabClass(tab: 'hour' | 'minute') {
 </script>
 
 <template>
-  <div class="flex flex-row m-4">
+<div class="flex items-center space-x-2">
+  <input
+    type="text"
+    placeholder="Enter time"
+    class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <button
+    type="button"
+    class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600"
+  >
+    <!-- Heroicon: Clock -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  </button>
+</div>
+
+
+  <!-- <div class="flex flex-row m-4">
     <UTooltip text="Click on icon for entering the time">
       <UInput type="text" v-bind="attrs" v-model="time"/>
     </UTooltip>
     <UPopover v-model:open="open">
-      <UButton icon="i-lucide-clock-3" size="md" color="primary" variant="solid"/>
-      <template #content class="w-125 flex flex-col items-center justify-center">
+      <UButton icon="i-lucide-clock-3" size="md" color="primary" variant="solid"/> -->
+
+      <!-- <template #content class="w-125 flex flex-col items-center justify-center"> -->
+
         <!-- Time Display 24h -->
         <div v-if="is24h" :style="{ backgroundColor: primaryColor }"
              class="flex flex-row items-center justify-center gap-4 text-neutral-100 p-2">
@@ -173,6 +195,7 @@ function activeTabClass(tab: 'hour' | 'minute') {
             {{ paddedTime.minute }}
           </button>
         </div>
+
         <!-- Time Display AM/PM -->
         <div v-if="!is24h" :style="{ backgroundColor: primaryColor }"
              class="flex flex-row items-center justify-center align-center gap-4 text-neutral-100 p-2">
@@ -189,14 +212,15 @@ function activeTabClass(tab: 'hour' | 'minute') {
         </div>
 
         <!-- Format Switch -->
-        <div class="flex flex-row gap-2 items-center justify-center p-2">
+        <!-- <div class="flex flex-row gap-2 items-center justify-center p-2">
           <USwitch class="w-10" v-model="is24h"/>
           <div class="text-lg text-center w-15">{{ is24h ? '24h' : 'AM/PM' }}</div>
           <UCheckbox v-if="!is24h" class="w-10" v-model="pm" :label="pmLabel"/>
           <div v-else class="w-10"></div>
-        </div>
-        <div class="w256 h256">
+        </div> -->
+
         <!-- Clock Dial -->
+        <div class="w260 h260">
         <ClockDial
           :mode="selecting"
           :hour="localHour"
@@ -208,21 +232,21 @@ function activeTabClass(tab: 'hour' | 'minute') {
           @switch="switchToMinutes"
         />
         </div>
-        <div class="flex flex-row gap-2 items-center justify-center p-2">
+        <!-- <div class="flex flex-row gap-2 items-center justify-center p-2">
           <UButton v-if="selecting === 'hour'" class="w-full justify-center" color="primary" @click="switchMode">Switch to minutes</UButton>
           <UButton v-if="selecting === 'minute'" class="w-full justify-center" color="primary" @click="switchMode">Switch to hours</UButton>
         </div>
       </template>
     </UPopover>
-  </div>
+  </div> -->
 </template>
 
 <style>
-.w256 {
-  width: 256px;
+.w260 {
+  width: 260px;
 }
 
-.h256 {
-  height: 256px;
+.h260 {
+  height: 260px;
 }
 </style>

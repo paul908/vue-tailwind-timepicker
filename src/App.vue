@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import ClockDial from "./components/ClockDial.vue";
+import InputTimePicker from "./components/InputTimePicker.vue";
 
 const is24h = ref<boolean>(true);
 const hour = ref<number>(12);
 const minute = ref<number>(30);
 const open = ref<boolean>(true);
 const pm = ref<boolean>(false);
+const time = ref<string>('12:30');
 
 const mode = ref<'hour' | 'minute'>('hour');
 const hourMinute = ref<{hour:number, minute:number}>({
@@ -43,8 +45,10 @@ const onSwitch = () => {
 </script>
 
 <template>
-  <ClockDial :is24h="is24h" :pm="pm" :hour="hour" :minute="minute" :mode="mode" :open="open"
-    @update:onUpdate="handleUpdate" @updatePm="onUpdatePm" @switch="onSwitch" />
+  <InputTimePicker v-model:is24h="is24h"  v-model:time="time"/>
+
+  <!-- <ClockDial :is24h="is24h" :pm="pm" :hour="hour" :minute="minute" :mode="mode" :open="open"
+    @update:onUpdate="handleUpdate" @updatePm="onUpdatePm" @switch="onSwitch" /> -->
 </template>
 
 <style scoped></style>

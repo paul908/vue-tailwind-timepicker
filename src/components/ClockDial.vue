@@ -518,10 +518,10 @@ function onTouchEnd(e: TouchEvent) {
 </script>
 
 <template>
-  <div class="m-2">
+  <div class="m-2 bg-gray-200">
     <canvas
       ref="canvasRef"
-      class="w256 h256 bg-neutral-200 dark:bg-neutral-800 rounded-full"
+      class="w256 h256 rounded-full"
       @click="onClick"
       @mousemove="onMouseMove"
     />

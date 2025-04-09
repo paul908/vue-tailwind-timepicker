@@ -1,30 +1,50 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from "vue";
+import ClockDial from "./components/ClockDial.vue";
+
+const is24h = ref<boolean>(true);
+const hour = ref<number>(12);
+const minute = ref<number>(30);
+const open = ref<boolean>(true);
+const pm = ref<boolean>(false);
+
+const mode = ref<'hour' | 'minute'>('hour');
+const hourMinute = ref<{hour:number, minute:number}>({
+  hour: 12,
+  minute: 30
+});
+
+const DEBUG = true;
+
+function debugLog(...args: any) {
+  if (DEBUG) console.log(...args);
+}
+
+
+const handleUpdate = (event: any) => {
+  hourMinute.value.hour = event.hour;
+  hourMinute.value.minute = event.minute;
+};
+
+const onUpdatePm = (value: boolean) => {
+  debugLog('onUpdatePm triggered with value:', value);
+  pm.value = value;
+  if (value) {
+    if (pm.value) {
+      hour.value = hour.value > 12 ? hour.value - 12 : hour.value;
+    }
+  }
+};
+
+const onSwitch = () => {
+  debugLog('Switch triggered');
+  mode.value = mode.value === 'hour' ? 'minute' : 'hour';
+}
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+  <ClockDial :is24h="is24h" :pm="pm" :hour="hour" :minute="minute" :mode="mode" :open="open"
+    @update:onUpdate="handleUpdate" @updatePm="onUpdatePm" @switch="onSwitch" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<style scoped></style>

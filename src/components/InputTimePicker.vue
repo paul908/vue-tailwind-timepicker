@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, computed, watch, onMounted, toRefs, useAttrs} from 'vue'
+import { ref, computed, watch, onMounted, toRefs, useAttrs } from 'vue'
 import ClockDial from "./ClockDial.vue";
 
 const time = defineModel<string>('time')
@@ -28,9 +28,9 @@ const setLocalTime = (time: string | undefined) => {
   const hh = parseInt(hhStr, 10);
   const mm = parseInt(mmStr, 10);
   pm.value = hh >= 12;
-  if (hh ===24) {
+  if (hh === 24) {
     localHour.value = 0;
-  } else{
+  } else {
     localHour.value = hh;
   }
   localMinute.value = mm;
@@ -148,97 +148,69 @@ function onUpdateAmPm(value: boolean) {
 
 function activeTabClass(tab: 'hour' | 'minute') {
   return tab === selecting.value
-    ? 'text-neutral-100 font-bold text-5xl'
-    : 'text-neutral-100 text-5xl'
+    ? 'text-neutral-900 font-bold text-5xl'
+    : 'text-neutral-600 text-5xl'
 }
 
 </script>
 
 <template>
-<div class="flex items-center space-x-2">
-  <input
-    type="text"
-    placeholder="Enter time"
-    class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-  />
-  <button
-    type="button"
-    class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600"
-  >
-    <!-- Heroicon: Clock -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round"
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  </button>
-</div>
+  <div class="flex flex-col items-center justify-center mx-auto p-4">
+    <!-- Display time -->
+    <div class="mx-auto flex flex-col">
+      <!-- Time Display 24h -->
+      <div v-if="is24h" :style="{ backgroundColor: primaryColor }"
+        class="flex flex-row items-center justify-center gap-4 text-neutral-600 p-2">
+        <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
+          {{ localHour }}
+        </button>
+        <span class="text-5xl font-semibold">:</span>
+        <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
+          {{ paddedTime.minute }}
+        </button>
+      </div>
 
+      <!-- Time Display AM/PM -->
+      <div v-if="!is24h" :style="{ backgroundColor: primaryColor }"
+        class="flex flex-row items-center justify-center align-center gap-4 text-neutral-600 p-2">
+        <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
+          {{ ampmHour }}
+        </button>
+        <span class="text-5xl font-semibold text-center align-middle">:</span>
+        <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
+          {{ paddedTime.minute }}
+        </button>
+        <button @click="selecting = 'minute'" class="text-2xl font-semibold">
+          {{ pm ? 'PM' : 'AM' }}
+        </button>
+      </div>
+    </div>
 
-  <!-- <div class="flex flex-row m-4">
-    <UTooltip text="Click on icon for entering the time">
-      <UInput type="text" v-bind="attrs" v-model="time"/>
-    </UTooltip>
-    <UPopover v-model:open="open">
-      <UButton icon="i-lucide-clock-3" size="md" color="primary" variant="solid"/> -->
+    <!-- Input string + clock button + Popover -->
+    <div class="flex items-center space-x-2">
+      <!-- Input string -->
+      <input type="text" placeholder="Enter time"
+        class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
 
-      <!-- <template #content class="w-125 flex flex-col items-center justify-center"> -->
+      <!-- Button with clock -->
+      <button type="button"
+        class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600">
+        <!-- lucide:clock-3 -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6h4.5" />
+          </g>
+        </svg>
+      </button>
+    </div>
 
-        <!-- Time Display 24h -->
-        <div v-if="is24h" :style="{ backgroundColor: primaryColor }"
-             class="flex flex-row items-center justify-center gap-4 text-neutral-100 p-2">
-          <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
-            {{ localHour }}
-          </button>
-          <span class="text-5xl font-semibold">:</span>
-          <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
-            {{ paddedTime.minute }}
-          </button>
-        </div>
-
-        <!-- Time Display AM/PM -->
-        <div v-if="!is24h" :style="{ backgroundColor: primaryColor }"
-             class="flex flex-row items-center justify-center align-center gap-4 text-neutral-100 p-2">
-          <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
-            {{ ampmHour }}
-          </button>
-          <span class="text-5xl font-semibold text-center align-middle">:</span>
-          <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
-            {{ paddedTime.minute }}
-          </button>
-          <button @click="selecting = 'minute'" class="text-2xl font-semibold">
-            {{ pm ? 'PM' : 'AM' }}
-          </button>
-        </div>
-
-        <!-- Format Switch -->
-        <!-- <div class="flex flex-row gap-2 items-center justify-center p-2">
-          <USwitch class="w-10" v-model="is24h"/>
-          <div class="text-lg text-center w-15">{{ is24h ? '24h' : 'AM/PM' }}</div>
-          <UCheckbox v-if="!is24h" class="w-10" v-model="pm" :label="pmLabel"/>
-          <div v-else class="w-10"></div>
-        </div> -->
-
-        <!-- Clock Dial -->
-        <div class="w260 h260">
-        <ClockDial
-          :mode="selecting"
-          :hour="localHour"
-          :minute="localMinute"
-          :is24h="safeIs24h"
-          :pm="pm"
-          @update="onClockSelect"
-          @updatePm="onUpdateAmPm"
-          @switch="switchToMinutes"
-        />
-        </div>
-        <!-- <div class="flex flex-row gap-2 items-center justify-center p-2">
-          <UButton v-if="selecting === 'hour'" class="w-full justify-center" color="primary" @click="switchMode">Switch to minutes</UButton>
-          <UButton v-if="selecting === 'minute'" class="w-full justify-center" color="primary" @click="switchMode">Switch to hours</UButton>
-        </div>
-      </template>
-    </UPopover>
-  </div> -->
+    <!-- Clock Dial -->
+    <div class="mx-auto flex flex-col items-center w-260 h-260">
+      <ClockDial :mode="selecting" :hour="localHour" :minute="localMinute" :is24h="safeIs24h" :pm="pm"
+        @update="onClockSelect" @updatePm="onUpdateAmPm" @switch="switchToMinutes" />
+    </div>
+  </div>
 </template>
 
 <style>

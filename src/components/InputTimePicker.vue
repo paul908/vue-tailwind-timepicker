@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, toRefs, useAttrs } from 'vue'
+import { ref, computed, watch, onMounted, toRefs, useAttrs, onBeforeUnmount } from 'vue'
 import ClockDial from "./ClockDial.vue";
 
 const time = defineModel<string>('time')
@@ -41,12 +41,26 @@ const selecting = ref<'hour' | 'minute'>('hour')
 const localHour = ref(0)
 const localMinute = ref(0)
 const pm = ref(false)
+
+const isOpen = ref<boolean>(false)
+const wrapper = ref<any>(null)
+
 setLocalTime(time.value);
 
 var primaryColor = '';
 var secondaryColor = '';
 var neutralColor = '';
 var textColor = '';
+
+function togglePopover() {
+  isOpen.value = !isOpen.value
+}
+
+function handleClickOutside(event: any) {
+  if (wrapper.value && !wrapper.value.contains(event.target)) {
+    isOpen.value = false
+  }
+}
 
 onMounted(() => {
   const root = getComputedStyle(document.documentElement);
@@ -55,6 +69,11 @@ onMounted(() => {
   neutralColor = root.getPropertyValue('--ui-color-neutral-200').trim();
   textColor = root.getPropertyValue('--ui-color-neutral-700').trim();
   debugLog("primaryColor: ", primaryColor);
+  document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 
 const safeIs24h = computed(() => {
@@ -152,12 +171,39 @@ function activeTabClass(tab: 'hour' | 'minute') {
     : 'text-neutral-600 text-5xl'
 }
 
+
+
 </script>
 
 <template>
   <div class="flex flex-col items-center justify-center mx-auto p-4">
+   <div ref="wrapper" class="relative inline-block">
+      <!-- Popover button -->
+      <button @click="togglePopover"
+        class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600">
+        <!-- lucide:clock-3 -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6h4.5" />
+          </g>
+        </svg>
+      </button>
+      
+      <!-- Popover content -->
+      <div v-show="isOpen" class="absolute z-10 mt-2 w-64 p-4 bg-white border rounded-lg shadow-lg">
+        <p class="text-gray-700">Dit is een Tailwind Popover met Vue 3.</p>
+      </div>
+    </div>
+  </div>
+
+
+  
+
+    <div class="flex flex-col items-center justify-center mx-auto p-4">
     <!-- Display time -->
     <div class="mx-auto flex flex-col">
+
       <!-- Time Display 24h -->
       <div v-if="is24h" :style="{ backgroundColor: primaryColor }"
         class="flex flex-row items-center justify-center gap-4 text-neutral-600 p-2">

@@ -47,10 +47,15 @@ const canvasRef = ref(null)
 
 setLocalTime(time.value);
 
-var primaryColor = '';
-var secondaryColor = '';
-var neutralColor = '';
-var textColor = '';
+// var primaryColor = '';
+// var secondaryColor = '';
+// var neutralColor = '';
+// var textColor = '';
+
+let primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-blue-500').trim();
+let neutralColor =  getComputedStyle(document.documentElement).getPropertyValue('--color-gray-400').trim();
+let textColor =  getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-50').trim();
+
 
 function togglePopover() {
   isOpen.value = !isOpen.value
@@ -63,12 +68,12 @@ function handleClickOutside(event: any) {
 }
 
 onMounted(async () => {
-  const root = getComputedStyle(document.documentElement);
-  primaryColor = root.getPropertyValue('--ui-color-primary-500').trim();
-  secondaryColor = root.getPropertyValue('--ui-color-secondary-500').trim();
-  neutralColor = root.getPropertyValue('--ui-color-neutral-200').trim();
-  textColor = root.getPropertyValue('--ui-color-neutral-700').trim();
-  debugLog("primaryColor: ", primaryColor);
+  // const root = getComputedStyle(document.documentElement);
+  // primaryColor = root.getPropertyValue('color-primary-500').trim();
+  // secondaryColor = root.getPropertyValue('color-secondary-500').trim();
+  // neutralColor = root.getPropertyValue('color-neutral-200').trim();
+  // textColor = root.getPropertyValue('color-neutral-700').trim();
+  // debugLog("primaryColor: ", primaryColor);
   document.addEventListener('click', handleClickOutside)
   debugLog("InputTimePicker onMounted: ", wrapper.value);
 
@@ -202,30 +207,32 @@ function activeTabClass(tab: 'hour' | 'minute') {
         <div v-show="isOpen"
              class="absolute left-1/2 top-full mt-2 transform -translate-x-1/2 z-10  p-4  bg-gray-200 border shadow-lg">
           <div class="container mx-auto flex flex-col items-center justify-center">
-            <!-- Time Display 24h -->
-            <div v-if="is24h" :style="{ backgroundColor: primaryColor }"
-                 class="flex flex-row items-center justify-center gap-4 text-neutral-100 p-2">
-              <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
-                {{ localHour }}
-              </button>
-              <span class="text-5xl font-semibold text-neutral-600 ">:</span>
-              <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
-                {{ paddedTime.minute }}
-              </button>
-            </div>
-            <!-- Time Display AM/PM -->
-            <div v-if="!is24h" :style="{ backgroundColor: primaryColor }"
-                 class="flex flex-row items-center justify-center align-center gap-4 text-neutral-100 p-2">
-              <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
-                {{ ampmHour }}
-              </button>
-              <span class="text-5xl font-semibold text-center align-middle text-neutral-600">:</span>
-              <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
-                {{ paddedTime.minute }}
-              </button>
-              <button @click="selecting = 'minute'" class="text-2xl font-semibold">
-                {{ pm ? 'PM' : 'AM' }}
-              </button>
+            <div :style="{ backgroundColor: primaryColor }">
+              <!-- Time Display 24h -->
+              <div v-if="is24h"
+                   class="flex flex-row items-center justify-center gap-4 text-neutral-100 p-2">
+                <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
+                  {{ localHour }}
+                </button>
+                <span class="text-5xl font-semibold text-neutral-600 ">:</span>
+                <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
+                  {{ paddedTime.minute }}
+                </button>
+              </div>
+              <!-- Time Display AM/PM -->
+              <div v-if="!is24h" :style="{ backgroundColor: primaryColor }"
+                   class="flex flex-row items-center justify-center align-center gap-4 text-neutral-100 p-2">
+                <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
+                  {{ ampmHour }}
+                </button>
+                <span class="text-5xl font-semibold text-center align-middle text-neutral-600">:</span>
+                <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
+                  {{ paddedTime.minute }}
+                </button>
+                <button @click="selecting = 'minute'" class="text-2xl font-semibold">
+                  {{ pm ? 'PM' : 'AM' }}
+                </button>
+              </div>
             </div>
 
             <!-- Format Switch -->

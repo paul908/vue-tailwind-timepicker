@@ -39,7 +39,7 @@ const lastMinute = ref<number>(props.minute)
 setIndex();
 // draw();
 
-let primary = getComputedStyle(document.documentElement).getPropertyValue('--color-sky-500').trim();
+let primary = getComputedStyle(document.documentElement).getPropertyValue('--color-blue-500').trim();
 let neutral =  getComputedStyle(document.documentElement).getPropertyValue('--color-gray-400').trim();
 let textCol =  getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-50').trim();
 

@@ -1,54 +1,119 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import ClockDial from "./components/ClockDial.vue";
+import {computed, onMounted, ref, watch} from "vue";
+import Checkbox from "./components/Checkbox.vue";
 import InputTimePicker from "./components/InputTimePicker.vue";
+import Switch from "./components/Switch.vue";
 
 const is24h = ref<boolean>(true);
-const hour = ref<number>(12);
-const minute = ref<number>(30);
-const open = ref<boolean>(true);
 const pm = ref<boolean>(false);
 const time = ref<string>('12:30');
+const selecting = ref<'hour' | 'minute'>('hour')
+const localHour = ref(0)
+const localMinute = ref(0)
+const enabled = ref(false)
 
-const mode = ref<'hour' | 'minute'>('hour');
-const hourMinute = ref<{hour:number, minute:number}>({
-  hour: 12,
-  minute: 30
-});
-
-const DEBUG = true;
+const DEBUG = false;
 
 function debugLog(...args: any) {
   if (DEBUG) console.log(...args);
 }
 
+var primaryColor = '';
+var secondaryColor = '';
+var neutralColor = '';
+var textColor = '';
 
-const handleUpdate = (event: any) => {
-  hourMinute.value.hour = event.hour;
-  hourMinute.value.minute = event.minute;
-};
 
-const onUpdatePm = (value: boolean) => {
-  debugLog('onUpdatePm triggered with value:', value);
-  pm.value = value;
-  if (value) {
-    if (pm.value) {
-      hour.value = hour.value > 12 ? hour.value - 12 : hour.value;
-    }
+onMounted(() => {
+  const root = getComputedStyle(document.documentElement);
+  primaryColor = root.getPropertyValue('--ui-color-primary-500').trim();
+  secondaryColor = root.getPropertyValue('--ui-color-secondary-500').trim();
+  neutralColor = root.getPropertyValue('--ui-color-neutral-200').trim();
+  textColor = root.getPropertyValue('--ui-color-neutral-700').trim();
+  debugLog("primaryColor: ", primaryColor);
+})
+
+const pmLabel = computed(() => {
+  debugLog("TimePicker.vue pmLabel: ", pm.value ? 'PM' : 'AM');
+  return pm.value ? 'PM' : 'AM';
+})
+
+const paddedTime = computed(() => ({
+  hour: localHour.value.toString().padStart(2, '0'),
+  minute: localMinute.value.toString().padStart(2, '0')
+}))
+
+const ampmHour = computed(() => {
+  let x = hourMinute.value.hour;
+  if (x > 12) {
+    x -= 12;
+  } else if (x === 0 || x === 24) {
+    x = 12;
   }
-};
+  return x
+})
 
-const onSwitch = () => {
-  debugLog('Switch triggered');
-  mode.value = mode.value === 'hour' ? 'minute' : 'hour';
-}
+// Structured format, e.g., { hour: 13, minute: 45 }
+const hourMinute = computed({
+  get() {
+    debugLog('compute hourMinute: ', time.value);
+    if (!time.value) return {hour: 0, minute: 0}
+    const [h, m] = time.value.split(':')
+    debugLog('index.vue time: ', time.value, ' - hour: ', h, ' - minute: ', m)
+    return {
+      hour: Number(h) || 0,
+      minute: Number(m) || 0,
+    }
+  },
+  set(val) {
+    const {hour, minute} = val
+    time.value = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+    debugLog('index.vue time: ', time.value, ' - hour: ', hour, ' - minute: ', minute)
+  }
+})
+
+watch(() => is24h.value, () => {
+  debugLog('index.vue is24h: ', is24h.value);
+})
+
+watch(() => time.value, () => {
+  debugLog('InputTimePicker watch(() => time.value: ', time.value);
+})
+
+watch(() => hourMinute.value.hour, () => {
+  debugLog("InputTimePicker.vue watch hourMinute.value.hour: ", hourMinute.value?.hour);
+  if (hourMinute.value) {
+    pm.value = hourMinute.value.hour >= 12;
+    debugLog("new pm.value: ", pm.value);
+  }
+})
+
 </script>
 
 <template>
-  <InputTimePicker v-model:is24h="is24h"  v-model:time="time"/>
-
-  <!-- <ClockDial :is24h="is24h" :pm="pm" :hour="hour" :minute="minute" :mode="mode" :open="open"
-    @update:onUpdate="handleUpdate" @updatePm="onUpdatePm" @switch="onSwitch" /> -->
+  <div class="flex flex-col items-center justify-center h-screen overflow-y-scroll">
+    <!--    InputTimePicker -->
+    <InputTimePicker v-model:is24h="is24h" v-model:time="time "/>
+    <!-- Time Display 24h -->
+    <div class="flex flex-col items-center justify-center mx-auto p-4">
+      <!--    Switch -->
+      <div class="flex items-center space-x-2">
+        <Switch v-model="is24h" label-enabled="24h" label-disabled="AM/PM"/>
+      </div>
+      <div v-if="is24h">
+        <p class="h-16 text-6xl text-center my-auto">{{
+            hourMinute.hour
+          }}:{{ hourMinute.minute.toString().padStart(2, '0') }}</p>
+      </div>
+      <div v-else >
+        <p class="h-16 text-6xl text-center my-auto">{{
+            ampmHour
+          }}:{{ hourMinute.minute.toString().padStart(2, '0') }}&nbsp;{{ pmLabel }}</p>
+      </div>
+    </div>
+  </div>
+  <!-- TimePicker -->
+  <!--  <TimePicker v-model:is24h="is24h" v-model:hour-minute="hourMinute"/>-->
 </template>
 
 <style scoped></style>

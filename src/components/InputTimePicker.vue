@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import {ref, computed, watch, onMounted, toRefs, useAttrs, onBeforeUnmount} from 'vue'
+import {ref, computed, watch, onMounted, nextTick, useAttrs, onBeforeUnmount} from 'vue'
 import Checkbox from "./Checkbox.vue";
 import ClockDial from "./ClockDial.vue";
 import Switch from "./Switch.vue";
 
 const time = defineModel<string>('time')
 const is24h = defineModel<boolean>('is24h')
+
+// capture "extra" attributes like inputClass, variant, etc.
+const attrs = useAttrs()
 
 const DEBUG = true;
 
@@ -16,11 +19,12 @@ function debugLog(...args: any) {
 function formatTime(hour: number, minute: number): string {
   const hh = hour.toString().padStart(2, '0');
   const mm = minute.toString().padStart(2, '0');
-  debugLog('InputTimePicker formatTime: ', hh, ':', mm, `${hh}:${mm}`);
+  // debugLog('InputTimePicker formatTime: ', hh, ':', mm, `${hh}:${mm}`);
   return `${hh}:${mm}`;
 }
 
 const setLocalTime = (time: string | undefined) => {
+  debugLog('InputTimePicker setLocalTime => input time: ', time);
   const strValue: string = time ?? '00:00';
   debugLog('InputTimePicker setLocalTime => time.value: ', strValue);
   const [hhStr, mmStr] = strValue.split(":");
@@ -35,7 +39,6 @@ const setLocalTime = (time: string | undefined) => {
   localMinute.value = mm;
 }
 
-const open = ref(false)
 const selecting = ref<'hour' | 'minute'>('hour')
 const localHour = ref(0)
 const localMinute = ref(0)
@@ -43,6 +46,7 @@ const pm = ref(false)
 
 const isOpen = ref<boolean>(false)
 const wrapper = ref<any>(null)
+const canvasRef = ref(null)
 
 setLocalTime(time.value);
 
@@ -61,7 +65,7 @@ function handleClickOutside(event: any) {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   const root = getComputedStyle(document.documentElement);
   primaryColor = root.getPropertyValue('--ui-color-primary-500').trim();
   secondaryColor = root.getPropertyValue('--ui-color-secondary-500').trim();
@@ -70,6 +74,15 @@ onMounted(() => {
   debugLog("primaryColor: ", primaryColor);
   document.addEventListener('click', handleClickOutside)
   debugLog("InputTimePicker onMounted: ", wrapper.value);
+
+  watch(isOpen, async (visible) => {
+    if (visible) {
+      await nextTick();
+      debugLog("after next tick: ");
+      canvasRef.value?.draw?.();
+      debugLog("after canvasRef.value?.draw?.();");
+    }
+  })
 })
 
 onBeforeUnmount(() => {
@@ -77,7 +90,7 @@ onBeforeUnmount(() => {
 })
 
 const safeIs24h = computed(() => {
-  debugLog('TimePicker.vue safeIs24h: ', is24h.value ?? true);
+  // debugLog('TimePicker.vue safeIs24h: ', is24h.value ?? true);
   return is24h.value ?? true
 })
 
@@ -97,13 +110,13 @@ const ampmHour = computed(() => {
 })
 
 watch(() => time.value, () => {
-  debugLog('InputTimePicker watch(() => time.value: ', time.value);
+  // debugLog('InputTimePicker watch(() => time.value: ', time.value);
   setLocalTime(time.value);
 })
 
 watch(() => pm.value, () => {
   if (pm.value) {
-    if (localHour.value <= 12) {
+    if (localHour.value < 12) {
       localHour.value += 12
     }
   } else {
@@ -115,16 +128,17 @@ watch(() => pm.value, () => {
     localHour.value = 0;
   }
   time.value = formatTime(localHour.value, localMinute.value);
-  debugLog("InputTimePicker.vue watch pm.value: ", pm.value, localHour.value, ':', localMinute.value,
-      ' - time.value: ', time.value);
+  // debugLog("InputTimePicker.vue watch pm.value: ", pm.value, localHour.value, ':', localMinute.value,
+  //     ' - time.value: ', time.value);
 })
 
-watch(open, (val) => {
-  debugLog('val: ', val);
+watch(isOpen, (val) => {
+  // debugLog('val: ', val);
   selecting.value = 'hour'
 })
 
 function onClockSelect(value: number) {
+  debugLog("InputTimePicker onClockSelect: ", value);
   if (selecting.value === 'hour') {
     localHour.value = value
     if (pm.value && !is24h.value) {
@@ -139,22 +153,22 @@ function onClockSelect(value: number) {
   debugLog("InputTimePicker onClockSelect: ", localHour.value, ':', localMinute.value, 'time: ', time.value);
 }
 
-// function switchMode() {
-//   debugLog('TimePicker.vue switchMode: ', selecting.value);
-//   if (selecting.value === 'hour') {
-//     selecting.value = 'minute'
-//   } else {
-//     selecting.value = 'hour'
-//   }
-// }
-
-function switchToMinutes() {
-  debugLog('TimePicker.vue switchMode: ', selecting.value);
+function switchMode() {
   if (selecting.value === 'hour') {
     selecting.value = 'minute'
   } else {
-    open.value = false;
+    selecting.value = 'hour'
   }
+  debugLog('TimePicker.vue switchMode: ', selecting.value);
+}
+
+function switchToMinutes() {
+  if (selecting.value === 'hour') {
+    selecting.value = 'minute'
+  } else {
+    isOpen.value = false;
+  }
+  debugLog('TimePicker.vue switchToMinutes: ', selecting.value);
 }
 
 function onUpdateAmPm(value: boolean) {
@@ -172,16 +186,17 @@ function activeTabClass(tab: 'hour' | 'minute') {
 </script>
 
 <template>
-  <!--  TODO place popover in the middle of input + button -->
-  <!--  TODO canvas not visible when opening popover -->
   <div class="flex flex-col items-center justify-center mx-auto p-4">
     <!-- Input string + clock button + Popover -->
     <div class="flex items-center space-x-2">
       <!-- Input string -->
-      <input type="text" placeholder="Enter time"
-             class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      <!--      <input type="text" placeholder="Enter time"-->
+      <!--             class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>-->
 
-      <div ref="wrapper" class="relative inline-block">
+      <div ref="wrapper" class="relative flex">
+        <!-- Input string -->
+        <input @click="togglePopover" type="text" placeholder="Click to open clock" v-bind="attrs" v-model="time"
+               class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
         <!-- Popover button with clock -->
         <button @click="togglePopover"
                 class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600">
@@ -225,25 +240,25 @@ function activeTabClass(tab: 'hour' | 'minute') {
             </div>
 
             <!-- Format Switch -->
-            <div class="flex flex-row gap-2 items-center justify-center p-2">
+            <div class="flex flex-row gap-2 items-center justify-center p-2 m-2">
               <Switch class="w-30" v-model="is24h" label-enabled="24h" label-disabled="AM/PM"/>
               <!--            <div class="text-lg text-center w-15">{{ is24h ? '24h' : 'AM/PM' }}</div>-->
               <Checkbox v-if="!is24h" label-enabled="PM" label-disabled="AM" class="w-20" v-model="pm"/>
             </div>
 
-            <!--          <div class="w256 h256">-->
-            <div>
+<!--            <div class="w256 h256">-->
+                          <div class="inline-block">
               <!-- Clock Dial -->
-              <ClockDial
-                  :mode="selecting"
-                  :hour="localHour"
-                  :minute="localMinute"
-                  :is24h="safeIs24h"
-                  :is-open="isOpen"
-                  :pm="pm"
-                  @update="onClockSelect"
-                  @updatePm="onUpdateAmPm"
-                  @switch="switchToMinutes"
+              <ClockDial ref="canvasRef"
+                         :mode="selecting"
+                         :hour="localHour"
+                         :minute="localMinute"
+                         :is24h="is24h"
+                         :is-open="isOpen"
+                         :pm="pm"
+                         @update="onClockSelect"
+                         @updatePm="onUpdateAmPm"
+                         @switch="switchToMinutes"
               />
             </div>
           </div>

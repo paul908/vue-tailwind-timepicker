@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref,  watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref,  watch, onMounted, onBeforeUnmount, defineExpose } from 'vue'
 
 const props = defineProps<{
   mode: 'hour' | 'minute'
@@ -20,7 +20,7 @@ const RADIUS_SMALL_FACTOR = 0.26;
 const BETWEEN_BIG_SMALL = (RADIUS_BIG_FACTOR + RADIUS_SMALL_FACTOR) / 2;
 const BETWEEN_ZERO_SMALL = RADIUS_SMALL_FACTOR - (RADIUS_BIG_FACTOR - RADIUS_SMALL_FACTOR) / 2;
 const DOT_RADIUS_FACTOR = 0.065;
-const DEBUG = false;
+const DEBUG = true;
 
 function debugLog(...args: any) {
   if (DEBUG) console.log(...args);
@@ -51,7 +51,8 @@ onMounted(() => {
   const canvas = canvasRef.value
 
   if (canvas) {
-
+    canvas.width = 256
+    canvas.height = 256
     draw();
 
     canvas.addEventListener('touchstart', onTouchStart, { passive: false })
@@ -92,7 +93,7 @@ watch(() => [props.pm], () => {
 })
 
 function setIndex() {
-  debugLog('setIndex()');
+  debugLog('setIndex() input: ', props.hour, props.minute, props.pm);
   if (props.mode === 'hour')
     if (props.is24h) {
       index.value = props.hour;
@@ -405,6 +406,8 @@ function draw() {
   ctx.textBaseline = 'middle';
   ctx.fillText(props.mode, x_center, y_center);
 }
+
+defineExpose({ draw }) // 👈 This makes draw() available to the parent
 
 function move(clientX: number, clientY: number) {
   const el = canvasRef.value

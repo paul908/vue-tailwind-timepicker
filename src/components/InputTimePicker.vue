@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, toRefs, useAttrs, onBeforeUnmount } from 'vue'
+import {ref, computed, watch, onMounted, toRefs, useAttrs, onBeforeUnmount} from 'vue'
+import Checkbox from "./Checkbox.vue";
 import ClockDial from "./ClockDial.vue";
+import Switch from "./Switch.vue";
 
 const time = defineModel<string>('time')
 const is24h = defineModel<boolean>('is24h')
 
-// capture "extra" attributes like inputClass, variant, etc.
-const attrs = useAttrs()
-
-const DEBUG = false;
+const DEBUG = true;
 
 function debugLog(...args: any) {
   if (DEBUG) console.log(...args);
@@ -70,6 +69,7 @@ onMounted(() => {
   textColor = root.getPropertyValue('--ui-color-neutral-700').trim();
   debugLog("primaryColor: ", primaryColor);
   document.addEventListener('click', handleClickOutside)
+  debugLog("InputTimePicker onMounted: ", wrapper.value);
 })
 
 onBeforeUnmount(() => {
@@ -79,10 +79,6 @@ onBeforeUnmount(() => {
 const safeIs24h = computed(() => {
   debugLog('TimePicker.vue safeIs24h: ', is24h.value ?? true);
   return is24h.value ?? true
-})
-
-const pmLabel = computed(() => {
-  return pm.value ? 'PM' : 'AM';
 })
 
 const paddedTime = computed(() => ({
@@ -120,10 +116,11 @@ watch(() => pm.value, () => {
   }
   time.value = formatTime(localHour.value, localMinute.value);
   debugLog("InputTimePicker.vue watch pm.value: ", pm.value, localHour.value, ':', localMinute.value,
-    ' - time.value: ', time.value);
+      ' - time.value: ', time.value);
 })
 
 watch(open, (val) => {
+  debugLog('val: ', val);
   selecting.value = 'hour'
 })
 
@@ -142,14 +139,14 @@ function onClockSelect(value: number) {
   debugLog("InputTimePicker onClockSelect: ", localHour.value, ':', localMinute.value, 'time: ', time.value);
 }
 
-function switchMode() {
-  debugLog('TimePicker.vue switchMode: ', selecting.value);
-  if (selecting.value === 'hour') {
-    selecting.value = 'minute'
-  } else {
-    selecting.value = 'hour'
-  }
-}
+// function switchMode() {
+//   debugLog('TimePicker.vue switchMode: ', selecting.value);
+//   if (selecting.value === 'hour') {
+//     selecting.value = 'minute'
+//   } else {
+//     selecting.value = 'hour'
+//   }
+// }
 
 function switchToMinutes() {
   debugLog('TimePicker.vue switchMode: ', selecting.value);
@@ -167,94 +164,91 @@ function onUpdateAmPm(value: boolean) {
 
 function activeTabClass(tab: 'hour' | 'minute') {
   return tab === selecting.value
-    ? 'text-neutral-900 font-bold text-5xl'
-    : 'text-neutral-600 text-5xl'
+      ? 'text-neutral-900 font-bold text-5xl'
+      : 'text-neutral-600 text-5xl'
 }
-
 
 
 </script>
 
 <template>
+  <!--  TODO place popover in the middle of input + button -->
+  <!--  TODO canvas not visible when opening popover -->
   <div class="flex flex-col items-center justify-center mx-auto p-4">
-   <div ref="wrapper" class="relative inline-block">
-      <!-- Popover button -->
-      <button @click="togglePopover"
-        class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600">
-        <!-- lucide:clock-3 -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-          <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6h4.5" />
-          </g>
-        </svg>
-      </button>
-      
-      <!-- Popover content -->
-      <div v-show="isOpen" class="absolute z-10 mt-2 w-64 p-4 bg-white border rounded-lg shadow-lg">
-        <p class="text-gray-700">Dit is een Tailwind Popover met Vue 3.</p>
-      </div>
-    </div>
-  </div>
-
-
-  
-
-    <div class="flex flex-col items-center justify-center mx-auto p-4">
-    <!-- Display time -->
-    <div class="mx-auto flex flex-col">
-
-      <!-- Time Display 24h -->
-      <div v-if="is24h" :style="{ backgroundColor: primaryColor }"
-        class="flex flex-row items-center justify-center gap-4 text-neutral-600 p-2">
-        <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
-          {{ localHour }}
-        </button>
-        <span class="text-5xl font-semibold">:</span>
-        <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
-          {{ paddedTime.minute }}
-        </button>
-      </div>
-
-      <!-- Time Display AM/PM -->
-      <div v-if="!is24h" :style="{ backgroundColor: primaryColor }"
-        class="flex flex-row items-center justify-center align-center gap-4 text-neutral-600 p-2">
-        <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
-          {{ ampmHour }}
-        </button>
-        <span class="text-5xl font-semibold text-center align-middle">:</span>
-        <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
-          {{ paddedTime.minute }}
-        </button>
-        <button @click="selecting = 'minute'" class="text-2xl font-semibold">
-          {{ pm ? 'PM' : 'AM' }}
-        </button>
-      </div>
-    </div>
-
     <!-- Input string + clock button + Popover -->
     <div class="flex items-center space-x-2">
       <!-- Input string -->
       <input type="text" placeholder="Enter time"
-        class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+             class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
 
-      <!-- Button with clock -->
-      <button type="button"
-        class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600">
-        <!-- lucide:clock-3 -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-          <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6h4.5" />
-          </g>
-        </svg>
-      </button>
-    </div>
+      <div ref="wrapper" class="relative inline-block">
+        <!-- Popover button with clock -->
+        <button @click="togglePopover"
+                class="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-md hover:bg-blue-600">
+          <!-- lucide:clock-3 -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6h4.5"/>
+            </g>
+          </svg>
+        </button>
 
-    <!-- Clock Dial -->
-    <div class="mx-auto flex flex-col items-center w-260 h-260">
-      <ClockDial :mode="selecting" :hour="localHour" :minute="localMinute" :is24h="safeIs24h" :pm="pm"
-        @update="onClockSelect" @updatePm="onUpdateAmPm" @switch="switchToMinutes" />
+        <!-- Popover content -->
+        <div v-show="isOpen"
+             class="absolute left-1/2 top-full mt-2 transform -translate-x-1/2 z-10  p-4  bg-gray-200 border shadow-lg">
+          <div class="container mx-auto flex flex-col items-center justify-center">
+            <!-- Time Display 24h -->
+            <div v-if="is24h" :style="{ backgroundColor: primaryColor }"
+                 class="flex flex-row items-center justify-center gap-4 text-neutral-100 p-2">
+              <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
+                {{ localHour }}
+              </button>
+              <span class="text-5xl font-semibold text-neutral-600 ">:</span>
+              <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
+                {{ paddedTime.minute }}
+              </button>
+            </div>
+            <!-- Time Display AM/PM -->
+            <div v-if="!is24h" :style="{ backgroundColor: primaryColor }"
+                 class="flex flex-row items-center justify-center align-center gap-4 text-neutral-100 p-2">
+              <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
+                {{ ampmHour }}
+              </button>
+              <span class="text-5xl font-semibold text-center align-middle text-neutral-600">:</span>
+              <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
+                {{ paddedTime.minute }}
+              </button>
+              <button @click="selecting = 'minute'" class="text-2xl font-semibold">
+                {{ pm ? 'PM' : 'AM' }}
+              </button>
+            </div>
+
+            <!-- Format Switch -->
+            <div class="flex flex-row gap-2 items-center justify-center p-2">
+              <Switch class="w-30" v-model="is24h" label-enabled="24h" label-disabled="AM/PM"/>
+              <!--            <div class="text-lg text-center w-15">{{ is24h ? '24h' : 'AM/PM' }}</div>-->
+              <Checkbox v-if="!is24h" label-enabled="PM" label-disabled="AM" class="w-20" v-model="pm"/>
+            </div>
+
+            <!--          <div class="w256 h256">-->
+            <div>
+              <!-- Clock Dial -->
+              <ClockDial
+                  :mode="selecting"
+                  :hour="localHour"
+                  :minute="localMinute"
+                  :is24h="safeIs24h"
+                  :is-open="isOpen"
+                  :pm="pm"
+                  @update="onClockSelect"
+                  @updatePm="onUpdateAmPm"
+                  @switch="switchToMinutes"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

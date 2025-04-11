@@ -50,10 +50,10 @@ const canvasRef = ref(null)
 
 setLocalTime(time.value);
 
-var primaryColor = '';
-var secondaryColor = '';
-var neutralColor = '';
-var textColor = '';
+let primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-blue-500').trim();
+let neutralColor = getComputedStyle(document.documentElement).getPropertyValue('--color-gray-400').trim();
+let textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-50').trim();
+
 
 function togglePopover() {
   isOpen.value = !isOpen.value
@@ -66,12 +66,6 @@ function handleClickOutside(event: any) {
 }
 
 onMounted(async () => {
-  const root = getComputedStyle(document.documentElement);
-  primaryColor = root.getPropertyValue('--ui-color-primary-500').trim();
-  secondaryColor = root.getPropertyValue('--ui-color-secondary-500').trim();
-  neutralColor = root.getPropertyValue('--ui-color-neutral-200').trim();
-  textColor = root.getPropertyValue('--ui-color-neutral-700').trim();
-  debugLog("primaryColor: ", primaryColor);
   document.addEventListener('click', handleClickOutside)
   debugLog("InputTimePicker onMounted: ", wrapper.value);
 
@@ -186,7 +180,7 @@ function activeTabClass(tab: 'hour' | 'minute') {
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center mx-auto p-4">
+  <div class="flex flex-col items-center justify-center mx-auto">
     <!-- Input string + clock button + Popover -->
     <div class="flex items-center space-x-2">
       <!-- Input string -->
@@ -211,32 +205,34 @@ function activeTabClass(tab: 'hour' | 'minute') {
 
         <!-- Popover content -->
         <div v-show="isOpen"
-             class="absolute left-1/2 top-full mt-2 transform -translate-x-1/2 z-10  p-4  bg-gray-200 border shadow-lg">
+             class="absolute left-1/2 top-full mt-2 transform -translate-x-1/2 z-10  bg-gray-200 border shadow-lg">
           <div class="container mx-auto flex flex-col items-center justify-center">
-            <!-- Time Display 24h -->
-            <div v-if="is24h" :style="{ backgroundColor: primaryColor }"
-                 class="flex flex-row items-center justify-center gap-4 text-neutral-100 p-2">
-              <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
-                {{ localHour }}
-              </button>
-              <span class="text-5xl font-semibold text-neutral-600 ">:</span>
-              <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
-                {{ paddedTime.minute }}
-              </button>
-            </div>
-            <!-- Time Display AM/PM -->
-            <div v-if="!is24h" :style="{ backgroundColor: primaryColor }"
-                 class="flex flex-row items-center justify-center align-center gap-4 text-neutral-100 p-2">
-              <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
-                {{ ampmHour }}
-              </button>
-              <span class="text-5xl font-semibold text-center align-middle text-neutral-600">:</span>
-              <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
-                {{ paddedTime.minute }}
-              </button>
-              <button @click="selecting = 'minute'" class="text-2xl font-semibold">
-                {{ pm ? 'PM' : 'AM' }}
-              </button>
+            <div class="popover-header">
+              <!-- Time Display 24h -->
+              <div v-if="is24h"
+                   class="flex flex-row items-center justify-center gap-4 text-neutral-100 p-2">
+                <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
+                  {{ localHour }}
+                </button>
+                <span class="text-5xl font-semibold text-neutral-600 ">:</span>
+                <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
+                  {{ paddedTime.minute }}
+                </button>
+              </div>
+              <!-- Time Display AM/PM -->
+              <div v-if="!is24h"
+                   class="flex flex-row items-center justify-center align-center gap-4 text-neutral-100 p-2">
+                <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
+                  {{ ampmHour }}
+                </button>
+                <span class="text-5xl font-semibold text-center align-middle text-neutral-600">:</span>
+                <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
+                  {{ paddedTime.minute }}
+                </button>
+                <button @click="selecting = 'minute'" class="text-2xl font-semibold">
+                  {{ pm ? 'PM' : 'AM' }}
+                </button>
+              </div>
             </div>
 
             <!-- Format Switch -->
@@ -246,8 +242,8 @@ function activeTabClass(tab: 'hour' | 'minute') {
               <Checkbox v-if="!is24h" label-enabled="PM" label-disabled="AM" class="w-20" v-model="pm"/>
             </div>
 
-<!--            <div class="w256 h256">-->
-                          <div class="inline-block">
+            <!--            <div class="w256 h256">-->
+            <div class="inline-block">
               <!-- Clock Dial -->
               <ClockDial ref="canvasRef"
                          :mode="selecting"
@@ -268,12 +264,11 @@ function activeTabClass(tab: 'hour' | 'minute') {
   </div>
 </template>
 
-<style>
-.w260 {
-  width: 260px;
-}
-
-.h260 {
-  height: 260px;
+<style scoped>
+.popover-header {
+  background-color: var(--color-blue-400); /* Replace with your desired color */
+  width: 100%; /* Ensures it spans the full width of the popover */
+  padding: 8px; /* Optional: Add padding for spacing */
+  box-sizing: border-box; /* Ensures padding is included in the width */
 }
 </style>

@@ -7,6 +7,7 @@ const props = defineProps<{
   hour: number
   minute: number
   pm: boolean
+  isOpen: boolean
 }>()
 
 // const root = getComputedStyle(document.documentElement);
@@ -19,7 +20,7 @@ const RADIUS_SMALL_FACTOR = 0.26;
 const BETWEEN_BIG_SMALL = (RADIUS_BIG_FACTOR + RADIUS_SMALL_FACTOR) / 2;
 const BETWEEN_ZERO_SMALL = RADIUS_SMALL_FACTOR - (RADIUS_BIG_FACTOR - RADIUS_SMALL_FACTOR) / 2;
 const DOT_RADIUS_FACTOR = 0.065;
-const DEBUG = true;
+const DEBUG = false;
 
 function debugLog(...args: any) {
   if (DEBUG) console.log(...args);
@@ -73,6 +74,13 @@ watch(() => [props.mode, props.hour, props.minute, props.is24h], () => {
   debugLog("watch props.mode, props.hour, props.minute, props.is24h");
   setIndex();
   draw();
+})
+
+watch(() => [props.isOpen], () => {
+  if (props.isOpen){
+    debugLog("watch props.isOpen is true");
+    draw();
+  }
 })
 
 watch(index, () => {
@@ -518,10 +526,10 @@ function onTouchEnd(e: TouchEvent) {
 </script>
 
 <template>
-  <div class="m-2 bg-gray-200">
+  <div class="m-2 bg-gray-200 z-20">
     <canvas
       ref="canvasRef"
-      class="w256 h256 rounded-full"
+      class="w-[256px] h-[256px] rounded-full z-30"
       @click="onClick"
       @mousemove="onMouseMove"
     />

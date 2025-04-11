@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import {computed, onMounted, ref, watch} from "vue";
-import Checkbox from "./components/Checkbox.vue";
 import InputTimePicker from "./components/InputTimePicker.vue";
 import Switch from "./components/Switch.vue";
+import TimePicker from "./components/TimePicker.vue";
 
 const is24h = ref<boolean>(true);
 const pm = ref<boolean>(false);
 const time = ref<string>('12:30');
-const selecting = ref<'hour' | 'minute'>('hour')
-const localHour = ref(0)
-const localMinute = ref(0)
-const enabled = ref(false)
 
 const DEBUG = false;
 
@@ -37,11 +33,6 @@ const pmLabel = computed(() => {
   debugLog("TimePicker.vue pmLabel: ", pm.value ? 'PM' : 'AM');
   return pm.value ? 'PM' : 'AM';
 })
-
-const paddedTime = computed(() => ({
-  hour: localHour.value.toString().padStart(2, '0'),
-  minute: localMinute.value.toString().padStart(2, '0')
-}))
 
 const ampmHour = computed(() => {
   let x = hourMinute.value.hour;
@@ -92,8 +83,10 @@ watch(() => hourMinute.value.hour, () => {
 
 <template>
   <div class="flex flex-col items-center justify-center h-screen overflow-y-scroll">
+
     <!--    InputTimePicker -->
     <InputTimePicker v-model:is24h="is24h" v-model:time="time "/>
+
     <!-- Time Display 24h -->
     <div class="flex flex-col items-center justify-center mx-auto p-4">
       <!--    Switch -->
@@ -105,15 +98,16 @@ watch(() => hourMinute.value.hour, () => {
             hourMinute.hour
           }}:{{ hourMinute.minute.toString().padStart(2, '0') }}</p>
       </div>
-      <div v-else >
+      <div v-else>
         <p class="h-16 text-6xl text-center my-auto">{{
             ampmHour
           }}:{{ hourMinute.minute.toString().padStart(2, '0') }}&nbsp;{{ pmLabel }}</p>
       </div>
     </div>
+
+    <!-- TimePicker -->
+    <TimePicker v-model:is24h="is24h" v-model:time="time "/>
   </div>
-  <!-- TimePicker -->
-  <!--  <TimePicker v-model:is24h="is24h" v-model:hour-minute="hourMinute"/>-->
 </template>
 
 <style scoped></style>

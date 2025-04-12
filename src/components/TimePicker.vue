@@ -4,15 +4,37 @@ import Checkbox from "./Checkbox.vue";
 import ClockDial from "./ClockDial.vue";
 import Switch from "./Switch.vue";
 
+/**
+ * TimePicker component
+ * This component is a time picker that allows users to select a time using a clock dial.
+ * It supports both 12-hour and 24-hour formats, and includes a popover for selecting the time.
+ * The component uses Vue's Composition API for state management and reactivity.
+ * @description A time picker component that allows users to select a time using a clock dial.
+ * @author Paul Becue BQ Systems http://bqsystems.be
+ * @version 1.0.0
+ */
+
+/**
+ * The time prop is a string representing the selected time in "HH:MM" format.
+ * The is24h prop is a boolean indicating whether to use 24-hour format (true) or 12-hour format (false).
+ * The component also includes a switch to toggle between 24-hour and 12-hour formats.
+ */
 const time = defineModel<string>('time')
 const is24h = defineModel<boolean>('is24h')
 
-const DEBUG = true;
-
+/** DEBUG is a constant that determines whether debug logging is enabled. */
+const DEBUG = false;
 function debugLog(...args: any) {
   if (DEBUG) console.log(...args);
 }
 
+/**
+ * formatTime is a utility function that formats the given hour and minute into a string in "HH:MM" format.
+ * It pads the hour and minute with leading zeros if necessary.
+ * @param hour - The hour to format (0-23).
+ * @param minute - The minute to format (0-59).
+ * @returns A string representing the formatted time in "HH:MM" format.
+ */
 function formatTime(hour: number, minute: number): string {
   const hh = hour.toString().padStart(2, '0');
   const mm = minute.toString().padStart(2, '0');
@@ -20,6 +42,11 @@ function formatTime(hour: number, minute: number): string {
   return `${hh}:${mm}`;
 }
 
+/**
+ * setLocalTime is a utility function that sets the local hour and minute based on the input time string.
+ * It also determines whether the time is in AM or PM based on the hour value.
+ * @param time - The input time string in "HH:MM" format.
+ */
 const setLocalTime = (time: string | undefined) => {
   debugLog('InputTimePicker setLocalTime => input time: ', time);
   const strValue: string = time ?? '00:00';
@@ -36,36 +63,61 @@ const setLocalTime = (time: string | undefined) => {
   localMinute.value = mm;
 }
 
+/**
+ * The selecting variable determines whether the user is currently selecting the hour or minute.
+ * The localHour and localMinute variables store the selected hour and minute values.
+ * The pm variable indicates whether the selected time is in PM (true) or AM (false).
+ * The isOpen variable controls the visibility of the popover.
+ * The wrapper variable is a reference to the popover wrapper element.
+ * The canvasRef variable is a reference to the clock dial component.
+ */
 const selecting = ref<'hour' | 'minute'>('hour')
 const localHour = ref(0)
 const localMinute = ref(0)
 const pm = ref(false)
-
 const isOpen = ref<boolean>(false)
 const wrapper = ref<any>(null)
 const canvasRef = ref(null)
 
 setLocalTime(time.value);
 
+/**
+ * The primaryColor, neutralColor, and textColor variables are used to store the computed CSS colors
+ * for the component's styling.
+ */
 let primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-blue-500').trim();
-let neutralColor =  getComputedStyle(document.documentElement).getPropertyValue('--color-gray-400').trim();
-let textColor =  getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-50').trim();
+let neutralColor = getComputedStyle(document.documentElement).getPropertyValue('--color-gray-400').trim();
+let textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-50').trim();
 
-
+/**
+ * togglePopover is a function that toggles the visibility of the popover.
+ * It sets the isOpen variable to true if it is currently false, and vice versa.
+ */
 function togglePopover() {
   isOpen.value = !isOpen.value
 }
 
+/**
+ * handleClickOutside is an event handler that closes the popover if the user clicks outside of it.
+ * It checks if the click target is not contained within the wrapper element.
+ * @param event - The click event object.
+ */
 function handleClickOutside(event: any) {
   if (wrapper.value && !wrapper.value.contains(event.target)) {
     isOpen.value = false
   }
 }
 
+/**
+ * onMounted lifecycle hook that adds a click event listener to the document when the component is mounted.
+ * It also sets up a watcher to redraw the clock dial when the popover is opened.
+ */
 onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
   debugLog("InputTimePicker onMounted: ", wrapper.value);
 
+  // Watcher to redraw the clock dial when the popover is opened. Why the nextTick?
+  // It was because otherwise you see no dial when you open the popover.
   watch(isOpen, async (visible) => {
     if (visible) {
       await nextTick();
@@ -76,20 +128,35 @@ onMounted(async () => {
   })
 })
 
+/**
+ * onBeforeUnmount lifecycle hook that removes the click event listener from the document when the component is unmounted.
+ */
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 
+/**
+ * safeIs24h is a computed property that returns the value of the is24h prop or defaults to true if not provided.
+ * It is used to determine whether to display the time in 24-hour format or 12-hour format.
+ */
 const safeIs24h = computed(() => {
   // debugLog('TimePicker.vue safeIs24h: ', is24h.value ?? true);
   return is24h.value ?? true
 })
 
+/**
+ * paddedTime is a computed property that returns an object containing the padded hour and minute values.
+ * It ensures that the hour and minute are always displayed with two digits (e.g., "09" instead of "9").
+ */
 const paddedTime = computed(() => ({
   hour: localHour.value.toString().padStart(2, '0'),
   minute: localMinute.value.toString().padStart(2, '0')
 }))
 
+/**
+ * ampmHour is a computed property that converts the local hour to 12-hour format if the is24h prop is false.
+ * It ensures that the hour is displayed correctly in AM/PM format.
+ */
 const ampmHour = computed(() => {
   let x = localHour.value;
   if (x > 12) {
@@ -100,11 +167,19 @@ const ampmHour = computed(() => {
   return x
 })
 
+/**
+ * watch function that monitors changes to the time prop and updates the local hour and minute values accordingly.
+ * It also sets the pm variable based on the hour value.
+ */
 watch(() => time.value, () => {
   // debugLog('InputTimePicker watch(() => time.value: ', time.value);
   setLocalTime(time.value);
 })
 
+/**
+ * watch function that monitors changes to the pm variable and updates the local hour value accordingly.
+ * It adjusts the hour value based on whether the time is in AM or PM.
+ */
 watch(() => pm.value, () => {
   if (pm.value) {
     if (localHour.value < 12) {
@@ -123,11 +198,19 @@ watch(() => pm.value, () => {
   //     ' - time.value: ', time.value);
 })
 
+/**
+ * watch function that monitors changes to the isOpen variable and sets the selecting variable to 'hour' when the popover is opened.
+ */
 watch(isOpen, (val) => {
   // debugLog('val: ', val);
   selecting.value = 'hour'
 })
 
+/**
+ * onClockSelect is an event handler that is called when the user selects a value from the clock dial.
+ * It updates the local hour or minute based on the selected value and formats the time accordingly.
+ * @param value - The selected value from the clock dial (hour or minute).
+ */
 function onClockSelect(value: number) {
   debugLog("InputTimePicker onClockSelect: ", value);
   if (selecting.value === 'hour') {
@@ -144,6 +227,10 @@ function onClockSelect(value: number) {
   debugLog("InputTimePicker onClockSelect: ", localHour.value, ':', localMinute.value, 'time: ', time.value);
 }
 
+/**
+ * switchMode is a function that toggles the selecting variable between 'hour' and 'minute'.
+ * It is used to switch between hour and minute selection modes in the popover.
+ */
 function switchMode() {
   if (selecting.value === 'hour') {
     selecting.value = 'minute'
@@ -153,6 +240,10 @@ function switchMode() {
   debugLog('TimePicker.vue switchMode: ', selecting.value);
 }
 
+/**
+ * switchToMinutes is a function that switches the selecting variable to 'minute' if it is currently 'hour'.
+ * If it is already 'minute', it closes the popover.
+ */
 function switchToMinutes() {
   if (selecting.value === 'hour') {
     selecting.value = 'minute'
@@ -162,11 +253,22 @@ function switchToMinutes() {
   debugLog('TimePicker.vue switchToMinutes: ', selecting.value);
 }
 
+/**
+ * onUpdateAmPm is an event handler that is called when the user updates the AM/PM selection.
+ * It updates the pm variable based on the selected value and adjusts the local hour accordingly.
+ * @param value - The selected AM/PM value (true for PM, false for AM).
+ */
 function onUpdateAmPm(value: boolean) {
   debugLog('InputTimePicker.vue onUpdateAmPm: ', value);
   pm.value = localHour.value >= 12;
 }
 
+/**
+ * activeTabClass is a utility function that returns the appropriate CSS class for the active tab (hour or minute).
+ * It is used to style the hour and minute buttons in the popover.
+ * @param tab - The tab to check ('hour' or 'minute').
+ * @returns The CSS class for the active tab.
+ */
 function activeTabClass(tab: 'hour' | 'minute') {
   return tab === selecting.value
       ? 'text-neutral-100 font-bold text-5xl'
@@ -194,9 +296,9 @@ function activeTabClass(tab: 'hour' | 'minute') {
 
         <!-- Popover content -->
         <div v-show="isOpen"
-             class="absolute left-1/2 top-full mt-2 transform -translate-x-1/2 z-10 bg-gray-200 border shadow-lg">
+             class="absolute left-1/2 top-full mt-2 transform -translate-x-1/2 z-10 bg-gray-200 border rounded-xl shadow-lg">
           <div class="flex flex-col items-center justify-center">
-            <div class="popover-header">
+            <div class="popover-header rounded-xl">
               <!-- Time Display 24h -->
               <div v-if="is24h"
                    class="flex flex-row items-center justify-center gap-4 text-neutral-100 p-2">
@@ -252,6 +354,7 @@ function activeTabClass(tab: 'hour' | 'minute') {
 </template>
 
 <style scoped>
+/* Scoped styles for the popover header */
 .popover-header {
   background-color: var(--color-blue-500); /* Replace with your desired color */
   width: 100%; /* Ensures it spans the full width of the popover */

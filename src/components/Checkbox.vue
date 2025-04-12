@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+/**
+ * Checkbox component
+ * @description A simple checkbox component that toggles between two states.
+ * @example <Checkbox labelEnabled="On" labelDisabled="Off" />
+ * @param {string} labelEnabled - The label for the enabled state.
+ * @param {string} labelDisabled - The label for the disabled state.
+ */
+
 const checked = defineModel()
 
 const props = defineProps<{

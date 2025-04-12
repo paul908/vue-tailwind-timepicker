@@ -1,4 +1,12 @@
 <script setup lang="ts">
+/**
+ * Switch component
+ * @description A simple switch component that toggles between two states.
+ * @example <Switch labelEnabled="On" labelDisabled="Off" />
+ * @param {string} labelEnabled - The label for the enabled state.
+ * @param {string} labelDisabled - The label for the disabled state.
+ */
+
 const enabled = defineModel()
 
 const props = defineProps<{

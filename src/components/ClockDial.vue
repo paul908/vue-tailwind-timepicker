@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { ref,  watch, onMounted, onBeforeUnmount } from 'vue'
 
+/**
+ * ClockDial component
+ * @description A simple clock dial component that allows the user to select a time.
+ * @example <ClockDial mode="hour" is24h="true" hour="12" minute="30" pm="false" isOpen="true" />
+ * @param {string} mode - The mode of the clock dial, either "hour" or "minute".
+ * @param {boolean} is24h - Whether the clock dial is in 24-hour format or not.
+ * @param {number} hour - The current hour value.
+ * @param {number} minute - The current minute value.
+ * @param {boolean} pm - Whether the current time is in PM or AM.
+ * @param {boolean} isOpen - Whether the clock dial is open or not.
+ */
 const props = defineProps<{
   mode: 'hour' | 'minute'
   is24h: boolean
@@ -10,21 +21,26 @@ const props = defineProps<{
   isOpen: boolean
 }>()
 
-// const root = getComputedStyle(document.documentElement);
-// const primaryColor = root.getPropertyValue('--ui-color-primary-500').trim();
-// const secondaryColor = root.getPropertyValue('--ui-color-secondary-500').trim();
-// const neutralColor = root.getPropertyValue('--ui-color-neutral-200').trim();
-// const textColor = root.getPropertyValue('--ui-color-neutral-700').trim();
 const RADIUS_BIG_FACTOR = 0.42;
 const RADIUS_SMALL_FACTOR = 0.26;
 const BETWEEN_BIG_SMALL = (RADIUS_BIG_FACTOR + RADIUS_SMALL_FACTOR) / 2;
 const BETWEEN_ZERO_SMALL = RADIUS_SMALL_FACTOR - (RADIUS_BIG_FACTOR - RADIUS_SMALL_FACTOR) / 2;
 const DOT_RADIUS_FACTOR = 0.065;
-const DEBUG = true;
 
+/**
+ * @description A function to log debug messages.
+ * @param {...any} args - The arguments to log.
+ */
+const DEBUG = false;
 function debugLog(...args: any) {
   if (DEBUG) console.log(...args);
 }
+
+/**
+ * @description A function to emit events from the component.
+ * @param {string} event - The name of the event to emit.
+ * @param {any} value - The value to pass with the event.
+ */
 
 const emit = defineEmits<{
   (e: 'update', value: number): void
@@ -532,7 +548,7 @@ function onTouchEnd(e: TouchEvent) {
   <div class="m-2 bg-gray-200 z-20">
     <canvas
       ref="canvasRef"
-      class="w-[256px] h-[256px] rounded-full z-30"
+      class="w-[256px] h-[256px] rounded-full z-30 mb-2"
       @click="onClick"
       @mousemove="onMouseMove"
     />

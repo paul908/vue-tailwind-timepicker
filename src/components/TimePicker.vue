@@ -169,8 +169,8 @@ function onUpdateAmPm(value: boolean) {
 
 function activeTabClass(tab: 'hour' | 'minute') {
   return tab === selecting.value
-      ? 'text-neutral-900 font-bold text-5xl'
-      : 'text-neutral-600 text-5xl'
+      ? 'text-neutral-100 font-bold text-5xl'
+      : 'text-neutral-200 text-5xl'
 }
 
 </script>
@@ -203,7 +203,7 @@ function activeTabClass(tab: 'hour' | 'minute') {
                 <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
                   {{ localHour }}
                 </button>
-                <span class="text-5xl font-semibold text-neutral-600 ">:</span>
+                <span class="text-5xl font-semibold text-neutral-200 ">:</span>
                 <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
                   {{ paddedTime.minute }}
                 </button>
@@ -214,7 +214,7 @@ function activeTabClass(tab: 'hour' | 'minute') {
                 <button @click="selecting = 'hour'" :class="activeTabClass('hour')">
                   {{ ampmHour }}
                 </button>
-                <span class="text-5xl font-semibold text-center align-middle text-neutral-600">:</span>
+                <span class="text-5xl font-semibold text-center align-middle text-neutral-200">:</span>
                 <button @click="selecting = 'minute'" :class="activeTabClass('minute')">
                   {{ paddedTime.minute }}
                 </button>
@@ -253,7 +253,7 @@ function activeTabClass(tab: 'hour' | 'minute') {
 
 <style scoped>
 .popover-header {
-  background-color: var(--color-blue-400); /* Replace with your desired color */
+  background-color: var(--color-blue-500); /* Replace with your desired color */
   width: 100%; /* Ensures it spans the full width of the popover */
   padding: 8px; /* Optional: Add padding for spacing */
   box-sizing: border-box; /* Ensures padding is included in the width */

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref,  watch, onMounted, onBeforeUnmount, defineExpose } from 'vue'
+import { ref,  watch, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps<{
   mode: 'hour' | 'minute'

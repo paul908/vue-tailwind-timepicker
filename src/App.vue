@@ -88,9 +88,9 @@ watch(() => hourMinute.value.hour, () => {
     <InputTimePicker v-model:is24h="is24h" v-model:time="time "/>
 
     <!-- Time Display 24h -->
-    <div class="flex flex-col items-center justify-center mx-auto p-4">
+    <div class="w-74 flex flex-col items-center justify-center mx-auto m-4 p-4 font-semibold text-neutral-600 border rounded-lg">
       <!--    Switch -->
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center justify-center space-x-2 m-4 border rounded-lg p-2 w-36">
         <Switch v-model="is24h" label-enabled="24h" label-disabled="AM/PM"/>
       </div>
       <div v-if="is24h">

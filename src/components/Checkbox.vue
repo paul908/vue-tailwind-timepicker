@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {defineProps, defineModel, computed } from 'vue'
+import { computed } from 'vue'
 
 const checked = defineModel()
 

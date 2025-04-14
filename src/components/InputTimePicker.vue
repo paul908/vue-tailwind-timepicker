@@ -88,7 +88,7 @@ const isOpen = ref<boolean>(false)
 const wrapper = ref<any>(null)
 // A reference to the wrapper DOM element for the time picker, used for click detection.
 
-const canvasRef = ref(null)
+const canvasRef = ref<HTMLCanvasElement | null>(null);
 // A reference to the ClockDial component, used for rendering and interaction.
 
 setLocalTime(time.value);
@@ -97,9 +97,9 @@ setLocalTime(time.value);
  * The primaryColor, neutralColor, and textColor variables are used to store the computed CSS colors
  * for the component's styling.
  */
-let primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-blue-500').trim();
-let neutralColor = getComputedStyle(document.documentElement).getPropertyValue('--color-gray-400').trim();
-let textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-50').trim();
+// let primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-blue-500').trim();
+// let neutralColor = getComputedStyle(document.documentElement).getPropertyValue('--color-gray-400').trim();
+// let textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-50').trim();
 
 /**
  * togglePopover is a function that toggles the visibility of the popover.
@@ -134,7 +134,7 @@ onMounted(async () => {
     if (visible) {
       await nextTick();
       debugLog("after next tick: ");
-      canvasRef.value?.draw?.();
+      (canvasRef.value as any)?.draw?.();
       debugLog("after canvasRef.value?.draw?.();");
     }
   })
@@ -243,14 +243,14 @@ function onClockSelect(value: number) {
  * switchMode is a function that toggles the selecting variable between 'hour' and 'minute'.
  * It is used to switch between hour and minute selection modes in the popover.
  */
-function switchMode() {
-  if (selecting.value === 'hour') {
-    selecting.value = 'minute'
-  } else {
-    selecting.value = 'hour'
-  }
-  debugLog('TimePicker.vue switchMode: ', selecting.value);
-}
+// function switchMode() {
+//   if (selecting.value === 'hour') {
+//     selecting.value = 'minute'
+//   } else {
+//     selecting.value = 'hour'
+//   }
+//   debugLog('TimePicker.vue switchMode: ', selecting.value);
+// }
 
 /**
  * switchToMinutes is a function that switches the selecting variable to 'minute' if it is currently 'hour'.
@@ -360,7 +360,7 @@ function activeTabClass(tab: 'hour' | 'minute') {
                          :mode="selecting"
                          :hour="localHour"
                          :minute="localMinute"
-                         :is24h="is24h"
+                         :is24h="safeIs24h"
                          :is-open="isOpen"
                          :pm="pm"
                          @update="onClockSelect"

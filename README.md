@@ -1,4 +1,4 @@
-# Demo TimePicker for Vue3 with Tailwind CSS v4
+# TimePicker for Vue3 with Tailwind CSS v4
 
 A simple and customizable time picker component for Vue 3, built with Tailwind CSS v4.
 
